@@ -13,24 +13,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Consulta a la base de datos
         $sql = "
         SELECT 
-            mdl_course.id,
-            mdl_course.shortname AS curso,
-            mdl_forum.name AS tarea, 
-            mdl_forum.intro AS intro,
-            mdl_user.lastname AS apellido,
-            mdl_user.firstname AS nombre,
-            mdl_forum_posts.subject AS subject,
-            mdl_forum_posts.message AS mensaje
-        FROM 
-            {forum} mdl_forum
-        LEFT JOIN 
-            {forum_discussions} mdl_forum_discussions ON mdl_forum_discussions.forum = mdl_forum.id
-        LEFT JOIN 
-            {forum_posts} mdl_forum_posts ON mdl_forum_posts.discussion = mdl_forum_discussions.id
-        LEFT JOIN 
-            {user} mdl_user ON mdl_user.id = mdl_forum_discussions.userid
-        LEFT JOIN 
-            {course} mdl_course ON mdl_course.id = mdl_forum.course
+    mdl_course.id AS idCurso,
+    mdl_course.shortname AS Curso,
+    mdl_assign.name AS Tarea,
+    mdl_assign.intro AS Intro,
+    mdl_user.lastname AS Apellido,
+    mdl_user.firstname AS Nombre,
+    mdl_assignsubmission_onlinetext.onlinetext AS TextoEnLinea
+FROM 
+    mdl_course
+JOIN 
+    mdl_assign 
+    ON mdl_assign.course = mdl_course.id
+JOIN 
+    mdl_assign_submission 
+    ON mdl_assign_submission.assignment = mdl_assign.id
+JOIN 
+    mdl_assignsubmission_onlinetext 
+    ON mdl_assignsubmission_onlinetext.submission = mdl_assign_submission.id
+JOIN 
+    mdl_user 
+    ON mdl_user.id = mdl_assign_submission.userid
         WHERE 
             mdl_course.id = ? AND mdl_user.lastname LIKE ?";
         
@@ -53,13 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Resultados de Foro</title>
+        <title>Resultados de Tarea</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body>
 
     <div class="container mt-5">
-        <h2 class="mb-4">Resultados del Foro</h2>
+        <h2 class="mb-4">Resultados de Tarea</h2>
         <p>Cantidad de resultados obtenidos: <?php echo $count_results; ?></p>
         <table class="table table-bordered">
             <thead>
