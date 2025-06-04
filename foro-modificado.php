@@ -1,31 +1,32 @@
 <?php
-// Mostrar errores para depuración
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require_once('../../config.php');
 
-require_once('../config.php');
-require_login();
-
-global $DB, $OUTPUT, $PAGE;
-
+// Capturar el apellido desde el formulario (GET)
 $apellido = optional_param('apellido', '', PARAM_RAW);
 
-// Página Moodle
-$PAGE->set_url(new moodle_url('/reportes/foro.php'));
-$PAGE->set_context(context_system::instance());
-$PAGE->set_title("Consulta de Foros por Usuario");
+// Encabezado HTML
+echo '<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Foros del usuario</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; width: 100%%; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>';
 
-echo $OUTPUT->header();
-
-echo '<div class="container">
-<h2>Buscar tareas del curso por apellido</h2>
-<form method="get" class="mb-4">
-  <label>Apellido del usuario:</label>
-  <input type="text" name="apellido" value="' . s($apellido) . '" class="form-control" style="max-width:300px; display:inline-block;" />
-  <button type="submit" class="btn btn-primary ml-2">Buscar</button>
+echo '<h2>Buscar tareas del curso por apellido</h2>
+<form method="get">
+  <label>Apellido: </label>
+  <input type="text" name="apellido" value="' . s($apellido) . '" />
+  <button type="submit">Buscar</button>
 </form>';
 
+// Solo ejecutar si se ingresó un apellido
 if (!empty($apellido)) {
   $sql = "
     SELECT 
@@ -53,8 +54,8 @@ if (!empty($apellido)) {
   $params = ['apellido' => "%$apellido%"];
   $registros = $DB->get_recordset_sql($sql, $params);
 
-  echo '<table class="table table-bordered table-striped">
-    <thead class="thead-dark"><tr>
+  echo '<table>
+    <tr>
       <th>Curso</th>
       <th>Tarea</th>
       <th>Intro</th>
@@ -62,7 +63,7 @@ if (!empty($apellido)) {
       <th>Nombre</th>
       <th>Asunto</th>
       <th>Mensaje</th>
-    </tr></thead><tbody>';
+    </tr>';
 
   foreach ($registros as $r) {
     echo '<tr>
@@ -76,10 +77,9 @@ if (!empty($apellido)) {
     </tr>';
   }
 
-  echo '</tbody></table>';
+  echo '</table>';
   $registros->close();
 }
 
-echo '</div>';
-echo $OUTPUT->footer();
+echo '</body></html>';
 ?>
