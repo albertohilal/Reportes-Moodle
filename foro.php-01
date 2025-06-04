@@ -20,7 +20,7 @@ $cursos = $DB->get_recordset_sql($sql);
 
 <div class="container mt-5">
     <h2 class="mb-4">Consulta en Foros</h2>
-    <form action="usuario-foro.php" method="post" target="_blank">
+    <form action="usuario-foro.php" method="post">
         <div class="form-group">
             <label for="courseId">Seleccione un Curso</label>
             <select class="form-control" id="courseId" name="course_id" required>

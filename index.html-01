@@ -11,10 +11,10 @@
     <div class="container mt-5">
         <h1 class="mb-3">Índice de Formularios de Reportes</h1>
         <ul class="list-group">
+            <!-- Lista de enlaces a formularios de reportes, abriendo en nueva pestaña -->
             <li class="list-group-item"><a href="foro.php" target="_blank">Formulario del Foro</a></li>
             <li class="list-group-item"><a href="estudiantePorCurso.php" target="_blank">Formulario de Estudiantes por Curso</a></li>
-            <li class="list-group-item"><a href="estudiantesPorAnioAsignatura.php" target="_blank">Formulario Estudiantes</a></li>
-            <li class="list-group-item"><a href="reporte_foro_usuarios.php?courseid=6" target="_blank">Reporte de Participación en Foros</a></li>
+            <li class="list-group-item"><a href="estudiantesPorAnioAsignatura.php" target="_blank">Formulario Estudiantes </a></li>
         </ul>
     </div>
     <!-- Cargar JS de Bootstrap -->
