@@ -1,106 +1,90 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once('../config.php');
 require_login();
-global $DB;
 
-$anio = optional_param('anio', '', PARAM_INT);
-$cursoid = optional_param('cursoid', '', PARAM_INT);
+$anio = optional_param('anio', '', PARAM_TEXT);
+$courseid = optional_param('courseid', '', PARAM_INT);
 
-$PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/reportes/estudiantesPorAnioAsignatura.php'));
+$context = context_system::instance();
+$PAGE->set_context($context);
+$PAGE->set_url(new moodle_url('/reportes/estudiantesPorAnioAsignatura.php', array('anio' => $anio, 'courseid' => $courseid)));
 $PAGE->set_title('Estudiantes por Año y Asignatura');
-$PAGE->set_heading('Estudiantes por Año y Asignatura');
+$PAGE->set_heading('Buscar estudiantes por año y asignatura');
 
+// Inyectar estilo para forzar visibilidad clara en select
+echo '<style>
+    select, select option {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+</style>';
+
+// Inicio de página
 echo $OUTPUT->header();
+echo $OUTPUT->heading('Buscar estudiantes por año y asignatura');
 
-// Obtener lista de años desde los cursos
-$sqlanios = "SELECT DISTINCT FROM_UNIXTIME(startdate, '%Y') as anio
-             FROM {course}
-             WHERE startdate > 0
-             ORDER BY anio DESC";
-$anios = $DB->get_records_sql_menu($sqlanios);
+// Formulario de búsqueda
+echo '<form method="GET" class="row mb-4">';
+echo '<div class="col-md-4 mb-3">';
+echo '<label for="anio" class="form-label">Año</label>';
+echo '<select name="anio" id="anio" class="form-select" onchange="this.form.submit()">';
+echo '<option value="">Seleccionar año</option>';
+for ($y = 2022; $y <= date('Y') + 1; $y++) {
+    $selected = ($anio == $y) ? 'selected' : '';
+    echo '<option value="' . $y . '" ' . $selected . '>' . $y . '</option>';
+}
+echo '</select>';
+echo '</div>';
 
-// Si hay un año elegido, obtenemos los cursos de ese año
-$cursos = [];
-if ($anio) {
-    $sqlcursos = "SELECT id, fullname
-                  FROM {course}
-                  WHERE FROM_UNIXTIME(startdate, '%Y') = :anio
-                  ORDER BY fullname ASC";
-    $cursos = $DB->get_records_sql_menu($sqlcursos, ['anio' => $anio]);
+echo '<div class="col-md-6 mb-3">';
+echo '<label for="courseid" class="form-label">Asignatura</label>';
+echo '<select name="courseid" id="courseid" class="form-select">';
+echo '<option value="">Seleccionar curso</option>';
+
+$courses = $DB->get_records('course', array(), 'fullname');
+foreach ($courses as $c) {
+    if (!$anio || strpos($c->fullname, $anio) !== false) {
+        $selected = ($courseid == $c->id) ? 'selected' : '';
+        echo '<option value="' . $c->id . '" ' . $selected . '>' . format_string($c->fullname) . '</option>';
+    }
+}
+echo '</select>';
+echo '</div>';
+
+echo '<div class="col-md-2 d-flex align-items-end">';
+echo '<button type="submit" class="btn btn-primary w-100">Buscar</button>';
+echo '</div>';
+echo '</form>';
+
+if (!empty($courseid)) {
+    $sql = "
+        SELECT u.username, u.firstname, u.lastname, u.email
+        FROM {user} u
+        JOIN {user_enrolments} ue ON ue.userid = u.id
+        JOIN {enrol} e ON e.id = ue.enrolid
+        WHERE e.courseid = :courseid
+        ORDER BY u.lastname, u.firstname
+    ";
+    $users = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+
+    echo '<h4>Resultados</h4>';
+    echo '<table class="table table-striped">';
+    echo '<thead><tr><th>Username</th><th>Nombre</th><th>Apellido</th><th>Email</th></tr></thead><tbody>';
+
+    foreach ($users as $u) {
+        echo '<tr>';
+        echo '<td>' . s($u->username) . '</td>';
+        echo '<td>' . s($u->firstname) . '</td>';
+        echo '<td>' . s($u->lastname) . '</td>';
+        echo '<td>' . s($u->email) . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
 }
 
-// Si hay curso seleccionado, buscamos estudiantes
-$estudiantes = [];
-if ($cursoid) {
-    $sql = "SELECT u.id, u.username, u.firstname, u.lastname, u.email
-            FROM {user} u
-            JOIN {role_assignments} ra ON ra.userid = u.id
-            JOIN {context} cx ON cx.id = ra.contextid
-            JOIN {course} c ON c.id = cx.instanceid
-            WHERE ra.roleid = 5 AND cx.contextlevel = 50 AND c.id = :cursoid";
-    $estudiantes = $DB->get_records_sql($sql, ['cursoid' => $cursoid]);
-}
-?>
-
-<div class="container py-4">
-    <h2 class="mb-4">Buscar estudiantes por año y asignatura</h2>
-    <form method="GET" class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <label for="anio" class="form-label">Año</label>
-            <select name="anio" id="anio" class="form-select" onchange="this.form.submit()">
-                <option value="">Seleccionar año</option>
-                <?php foreach ($anios as $valor => $label): ?>
-                    <option value="<?= $valor ?>" <?= $anio == $valor ? 'selected' : '' ?>><?= $label ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <?php if (!empty($cursos)): ?>
-        <div class="col-md-6 mb-3">
-            <label for="cursoid" class="form-label">Asignatura</label>
-            <select name="cursoid" id="cursoid" class="form-select">
-                <option value="">Seleccionar asignatura</option>
-                <?php foreach ($cursos as $id => $nombre): ?>
-                    <option value="<?= $id ?>" <?= $cursoid == $id ? 'selected' : '' ?>><?= format_string($nombre) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="col-md-2 mb-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Buscar</button>
-        </div>
-        <?php endif; ?>
-    </form>
-
-    <?php if ($cursoid): ?>
-        <h4>Resultados</h4>
-        <?php if (!empty($estudiantes)): ?>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Username</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>Email</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($estudiantes as $e): ?>
-                            <tr>
-                                <td><?= s($e->username) ?></td>
-                                <td><?= s($e->firstname) ?></td>
-                                <td><?= s($e->lastname) ?></td>
-                                <td><?= s($e->email) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-warning">No se encontraron estudiantes.</div>
-        <?php endif; ?>
-    <?php endif; ?>
-</div>
-
-<?php echo $OUTPUT->footer(); ?>
+echo $OUTPUT->footer();

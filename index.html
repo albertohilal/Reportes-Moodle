@@ -6,18 +6,33 @@
     <title>Índice de Reportes</title>
     <!-- Cargar CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #0d6efd;
+        }
+        .btn-report {
+            text-align: left;
+            white-space: normal;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-3">Índice de Formularios de Reportes</h1>
-        <ul class="list-group">
-  <li class="list-group-item"><a href="foro.php" target="_blank">Formulario del Foro</a></li>
-  <li class="list-group-item"><a href="tarea.php" target="_blank">Formulario de Tarea</a></li>
-  <li class="list-group-item"><a href="estudiantePorCurso.php" target="_blank">Formulario de Estudiantes por Curso</a></li>
-  <li class="list-group-item"><a href="estudiantesPorAnioAsignatura.php" target="_blank">Formulario Estudiantes</a></li>
-  <li class="list-group-item"><a href="usuario-foro.php?courseid=6" target="_blank">Reporte de Participación en Foros</a></li>
-</ul>
-
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="mb-4">Índice de Formularios de Reportes</h1>
+                <div class="d-grid gap-2">
+                    <a href="foro.php" target="_blank" class="btn btn-outline-primary btn-report">Formulario del Foro</a>
+                    <a href="tarea.php" target="_blank" class="btn btn-outline-primary btn-report">Formulario de Tarea</a>
+                    <a href="estudiantePorCurso.php" target="_blank" class="btn btn-outline-primary btn-report">Formulario de Estudiantes por Curso</a>
+                    <a href="estudiantesPorAnioAsignatura.php" target="_blank" class="btn btn-outline-primary btn-report">Formulario Estudiantes por Año y Asignatura</a>
+                    <a href="usuario-foro.php?courseid=6" target="_blank" class="btn btn-outline-primary btn-report">Reporte de Participación en Foros</a>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- Cargar JS de Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
